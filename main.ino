@@ -1,52 +1,46 @@
-#include <Servo.h>
+#include <SparkFun_TB6612.h>
+
+const int ARENA_DIAMETER = 77; 
 
 // Pinagem
-#define RIGHT_MOTOR_PIN 10 // motor direito
-#define LEFT_MOTOR_PIN 9 // motor esquerdo
-#define RIGHT_LINE_SENSOR_PIN 2 // sensor de linha direito
-#define LEFT_LINE_SENSOR_PIN 3 // sensor de linha esquerdo
-#define RIGHT_OBSTACLE_SENSOR_PIN 17 // sharp direito
-#define LEFT_OBSTACLE_SENSOR_PIN 18 // sharp esquerdo
 
-#define ARENA_DIAMETER 77
+// Motor direito
+const int RIGHT_MOTOR_AI1_PIN = 4; 
+const int RIGHT_MOTOR_AI2_PIN = 7; 
+const int RIGHT_MOTOR_PWM_PIN = 6; 
 
-Servo right_motor;
-Servo left_motor;
+// Motor esquerdo
+const int LEFT_MOTOR_BI1_PIN = 8; 
+const int LEFT_MOTOR_BI2_PIN = 9; 
+const int LEFT_MOTOR_PWM_PIN = 5; 
+
+// Sensores de linha
+const int RIGHT_LINE_SENSOR_PIN = 2; 
+const int LEFT_LINE_SENSOR_PIN = 3; 
+
+// Sensores de obstáculo
+const int RIGHT_OBS_SENSOR_PIN = A4; 
+const int LEFT_OBS_SENSOR_PIN = A3; 
+
+Motor right_motor = Motor(
+  RIGHT_MOTOR_AI1_PIN, 
+  RIGHT_MOTOR_AI2_PIN, 
+  RIGHT_MOTOR_PWM_PIN,
+  1,
+  A7
+);
+
+Motor left_motor = Motor(
+  LEFT_MOTOR_BI1_PIN,
+  LEFT_MOTOR_BI2_PIN,
+  LEFT_MOTOR_PWM_PIN,
+  1,
+  A7
+);
 
 void setup() {
-  right_motor.attach(RIGHT_MOTOR_PIN); 
-  left_motor.attach(LEFT_MOTOR_PIN); 
-  right_motor.write(90); 
-  left_motor.write(90); 
-  pinMode(RIGHT_LINE_SENSOR_PIN, INPUT); 
-  pinMode(LEFT_LINE_SENSOR_PIN, INPUT);
-  pinMode(RIGHT_OBSTACLE_SENSOR_PIN, INPUT); 
-  pinMode(LEFT_OBSTACLE_SENSOR_PIN, INPUT); 
-  Serial.begin(9600); 
-}
-
-void frente(int speed) {
-  Serial.println('frente...'); 
-  right_motor.write(90 + speed); 
-  left_motor.write(90 + speed);
-}
-
-void tras(int speed) {
-  Serial.println('tras...'); 
-  right_motor.write(90 - speed); 
-  left_motor.write(90 - speed); 
-}
-
-void direita(int speed) {
-  Serial.println('direita...'); 
-  right_motor.write(90 - speed); 
-  left_motor.write(90 + speed);
-}
-
-void esquerda(int speed) {
-  Serial.println('esquerda...'); 
-  right_motor.write(90 + speed); 
-  left_motor.write(90 - speed); 
+  Serial.begin(9600);
+  delay(5000); 
 }
 
 int getDistance(int sensor_pin) {
@@ -55,24 +49,38 @@ int getDistance(int sensor_pin) {
   return distanceCM; 
 }
 
+void turnLeft(int speed) {
+  right_motor.drive(speed); 
+  left_motor.drive(-speed); 
+}
+
+void turnRight(int speed) {
+  right_motor.drive(-speed); 
+  left_motor.drive(speed); 
+}
+
 void sens_obs() {
-  int sod = getDistance(RIGHT_OBSTACLE_SENSOR_PIN); 
-  int soe = getDistance(LEFT_OBSTACLE_SENSOR_PIN); 
+  int sod = getDistance(RIGHT_OBS_SENSOR_PIN); 
+  int soe = getDistance(LEFT_OBS_SENSOR_PIN); 
 
   if (sod > ARENA_DIAMETER && soe > ARENA_DIAMETER) {
-    frente(45); 
+    Serial.println("Frente lento...");
+    forward(right_motor, left_motor, 128); 
   }
 
   if (sod > ARENA_DIAMETER && soe <= ARENA_DIAMETER) {
-    esquerda(90); 
+    Serial.println("Esquerda...");
+    turnLeft(255); 
   }
 
   if (sod <= ARENA_DIAMETER && soe > ARENA_DIAMETER) {
-    direita(90); 
+    Serial.println("Direita...");
+    turnRight(255); 
   }
 
   if (sod <= ARENA_DIAMETER && soe <= ARENA_DIAMETER) {
-    frente(90); 
+    Serial.println("Frente rapido...");
+    forward(right_motor, left_motor, 255); 
   }
 }
 
@@ -80,17 +88,21 @@ void loop() {
   sens_obs(); 
 
   if(digitalRead(LEFT_LINE_SENSOR_PIN) == LOW) {
-    tras(90); 
-    delay(100); 
-    direita(90); 
-    delay(150); 
+    back(right_motor, left_motor, 255); 
+    Serial.println("tras..."); 
+    delay(200); 
+    turnRight(255); 
+    Serial.println("Direita..."); 
+    delay(250); 
   }
 
   if(digitalRead(RIGHT_LINE_SENSOR_PIN) == LOW) {
-    tras(90); 
-    delay(100); 
-    esquerda(90); 
-    delay(150); 
+    back(right_motor, left_motor, 255); 
+    Serial.println("tras..."); 
+    delay(200); 
+    turnLeft(255); 
+    Serial.println("Esquerda..."); 
+    delay(250); 
   }
 
 }
