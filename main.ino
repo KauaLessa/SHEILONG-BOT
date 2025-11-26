@@ -1,6 +1,6 @@
 #include <SparkFun_TB6612.h>
 
-const int ARENA_DIAMETER = 77; 
+const int DETECTION_LIMIT = 80; 
 
 // Pinagem
 
@@ -19,8 +19,14 @@ const int RIGHT_LINE_SENSOR_PIN = 2;
 const int LEFT_LINE_SENSOR_PIN = 3; 
 
 // Sensores de obstáculo
-const int RIGHT_OBS_SENSOR_PIN = A4; 
-const int LEFT_OBS_SENSOR_PIN = A3; 
+
+// Sensores frontais
+const int OBS1_SENSOR_PIN = A4; // Direita
+const int OBS2_SENSOR_PIN = A3; // Esquerda
+
+// Sensores laterais
+const int OBS3_SENSOR_PIN = A5; // Direita
+const int OBS4_SENSOR_PIN = A6; // Esquerda
 
 Motor right_motor = Motor(
   RIGHT_MOTOR_AI1_PIN, 
@@ -39,6 +45,8 @@ Motor left_motor = Motor(
 );
 
 void setup() {
+  pinMode(LEFT_LINE_SENSOR_PIN, INPUT_PULLUP);
+  pinMode(RIGHT_LINE_SENSOR_PIN, INPUT_PULLUP);
   Serial.begin(9600);
   delay(5000); 
 }
@@ -60,27 +68,43 @@ void turnRight(int speed) {
 }
 
 void sens_obs() {
-  int sod = getDistance(RIGHT_OBS_SENSOR_PIN); 
-  int soe = getDistance(LEFT_OBS_SENSOR_PIN); 
+  int front_right = getDistance(OBS1_SENSOR_PIN); 
+  int front_left  = getDistance(OBS2_SENSOR_PIN); 
+  int side_right  = getDistance(OBS3_SENSOR_PIN); 
+  int side_left   = getDistance(OBS4_SENSOR_PIN); 
 
-  if (sod > ARENA_DIAMETER && soe > ARENA_DIAMETER) {
-    Serial.println("Frente lento...");
-    forward(right_motor, left_motor, 128); 
+  // 1. Ataque direto (inimigo na frente)
+  if (front_right <= DETECTION_LIMIT && front_left <= DETECTION_LIMIT) {
+    Serial.println("ATAQUE!!!");
+    forward(right_motor, left_motor, 255);
   }
 
-  if (sod > ARENA_DIAMETER && soe <= ARENA_DIAMETER) {
-    Serial.println("Esquerda...");
-    turnLeft(255); 
+  // 2. Alinhamento lateral
+  else if (side_right <= DETECTION_LIMIT) {
+    Serial.println("Virando pra direita (inimigo lateral)...");
+    turnRight(255);
   }
 
-  if (sod <= ARENA_DIAMETER && soe > ARENA_DIAMETER) {
-    Serial.println("Direita...");
-    turnRight(255); 
+  else if (side_left <= DETECTION_LIMIT) {
+    Serial.println("Virando pra esquerda (inimigo lateral)...");
+    turnLeft(255);
   }
 
-  if (sod <= ARENA_DIAMETER && soe <= ARENA_DIAMETER) {
-    Serial.println("Frente rapido...");
-    forward(right_motor, left_motor, 255); 
+  // 3. Alinhamento frontal
+  else if (front_right <= DETECTION_LIMIT) {
+    Serial.println("Ajuste direita...");
+    turnRight(200);
+  }
+
+  else if (front_left <= DETECTION_LIMIT) {
+    Serial.println("Ajuste esquerda...");
+    turnLeft(200);
+  }
+
+  // 4. Nenhum sensor detectou → procurar
+  else {
+    Serial.println("Procurando...");
+    forward(right_motor, left_motor, 120);
   }
 }
 
