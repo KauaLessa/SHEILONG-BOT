@@ -3,12 +3,12 @@ const int DETECTION_LIMIT = 80;
 // Pinagem
 
 // Motor direito
-const int RIGHT_MOTOR_AI1_PIN = 4; 
-const int RIGHT_MOTOR_AI2_PIN = 7; 
+const int RIGHT_MOTOR_INT1_PIN = 4; 
+const int RIGHT_MOTOR_INT2_PIN = 7; 
 
 // Motor esquerdo
-const int LEFT_MOTOR_BI1_PIN = 8; 
-const int LEFT_MOTOR_BI2_PIN = 9; 
+const int LEFT_MOTOR_INT3_PIN = 8; 
+const int LEFT_MOTOR_INT4_PIN = 9; 
 
 // Sensores de linha
 const int RIGHT_LINE_SENSOR_PIN = 2; 
@@ -48,8 +48,8 @@ void motor_back(MOTOR motor) {
   digitalWrite(motor.IN2, HIGH); 
 }
 
-MOTOR right_motor = init_motor(RIGHT_MOTOR_AI1_PIN, RIGHT_MOTOR_AI2_PIN); 
-MOTOR left_motor = init_motor(LEFT_MOTOR_BI1_PIN, LEFT_MOTOR_BI2_PIN); 
+MOTOR right_motor = init_motor(RIGHT_MOTOR_INT1_PIN, RIGHT_MOTOR_INT2_PIN); 
+MOTOR left_motor = init_motor(LEFT_MOTOR_INT3_PIN, LEFT_MOTOR_INT4_PIN); 
 
 void move_robot_foward() {
   motor_foward(right_motor); 
