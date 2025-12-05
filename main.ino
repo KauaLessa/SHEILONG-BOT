@@ -44,14 +44,14 @@ MOTOR init_motor(uint8_t IN1, uint8_t IN2, uint8_t PWM) {
 }
 
 void motor_foward(MOTOR motor, int speed) {
-  digitalWrite(motor.IN1, HIGH); 
-  digitalWrite(motor.IN2, LOW); 
+  digitalWrite(motor.IN1, LOW); 
+  digitalWrite(motor.IN2, HIGH); 
   analogWrite(motor.PWM, speed); 
 }
 
 void motor_back(MOTOR motor, int speed) {
-  digitalWrite(motor.IN1, LOW); 
-  digitalWrite(motor.IN2, HIGH); 
+  digitalWrite(motor.IN1, HIGH); 
+  digitalWrite(motor.IN2, LOW); 
   analogWrite(motor.PWM, speed); 
 }
 
